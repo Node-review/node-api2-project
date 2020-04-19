@@ -20,9 +20,17 @@ router.post('/', async (req, res) => {
 });
 
 router.post('/:id/comments', async (req, res) => {
-
   try {
-
+    const { id } = req.params;
+    const commentInfo = { ...req.body, post_id: id }
+    if (!commentInfo) {
+      res.status(404).json({ message: 'The post with the specified ID does not exist' })
+    } else if (!commentInfo.text) {
+      res.status(400).json({ message: 'Please provide text for the comment' })
+    } else {
+      const inserted = await db.insertComment(commentInfo);
+      res.status(201).json(inserted)
+    }
   }
   catch (err) {
     res.status(500).json({ message: 'There was an error while saving the comment to the database' })
@@ -67,7 +75,9 @@ router.get('/:id/comments', async (req, res) => {
   catch (err) {
     res.status(500).json({ err, message: 'The comments information could not be retrieved' })
   }
-})
+});
+
+
 
 
 module.exports = router;
